@@ -12,7 +12,7 @@ import (
 )
 
 type ClusterInfo struct {
-	CertificateAuthorityData string `yaml:"certificate-authorithy-data"`
+	CertificateAuthorityData string `yaml:"certificate-authority-data"`
 	Server                   string `yaml:"server"`
 }
 
@@ -46,9 +46,9 @@ type KubeConfig struct {
 	CurrentContext string                      `yaml:"current-context"`
 	Kind           string                      `yaml:"kind"`
 	Preferences    map[interface{}]interface{} `yaml:"preferences"`
-	Clusters       []ClusterConfig             `yaml:"clusters"`
-	Contexts       []ContextConfig             `yaml:"contexts"`
-	Users          []UserConfig                `yaml:"users"`
+	Clusters       []*ClusterConfig            `yaml:"clusters"`
+	Contexts       []*ContextConfig            `yaml:"contexts"`
+	Users          []*UserConfig               `yaml:"users"`
 }
 
 func ReadConfigToImport() (*KubeConfig, error) {
@@ -75,6 +75,9 @@ func GetLocalConfigPath() (string, error) {
 
 func ReadLocalConfig() (*KubeConfig, error) {
 	p, err := GetLocalConfigPath()
+	if err != nil {
+		return nil, err
+	}
 	f, err := os.Open(p)
 	if err != nil {
 		return nil, err
@@ -98,6 +101,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	//pp.Print(configToImport)
 	localConfig, err := ReadLocalConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -127,7 +131,7 @@ func main() {
 				},
 				Name: configName,
 			}
-			localConfig.Clusters = append(localConfig.Clusters, cluster)
+			localConfig.Clusters = append(localConfig.Clusters, &cluster)
 		}
 	}()
 	go func() {
@@ -148,7 +152,7 @@ func main() {
 				},
 				Name: configName,
 			}
-			localConfig.Contexts = append(localConfig.Contexts, context)
+			localConfig.Contexts = append(localConfig.Contexts, &context)
 		}
 	}()
 	go func() {
@@ -169,7 +173,7 @@ func main() {
 				},
 				Name: configName,
 			}
-			localConfig.Users = append(localConfig.Users, user)
+			localConfig.Users = append(localConfig.Users, &user)
 		}
 	}()
 	wg.Wait()
