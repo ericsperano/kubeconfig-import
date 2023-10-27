@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 	"sync"
 
 	"gopkg.in/yaml.v2"
@@ -179,6 +180,9 @@ func main() {
 	wg.Wait()
 	p, err := GetLocalConfigPath()
 	if err != nil {
+		log.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(p), 0755); err != nil {
 		log.Fatal(err)
 	}
 	d, err := yaml.Marshal(localConfig)
